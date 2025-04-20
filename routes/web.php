@@ -27,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
     Route::post('/start-work', [App\Http\Controllers\UserController::class, 'startWork'])->name('start.work');
-    
+    Route::post('/stop-work', [App\Http\Controllers\UserController::class, 'stopWork'])->name('stop.work');
 });
 
 Route::get('/superadmin/dashboard', fn() => view('superadmin.dashboard'))->name('superadmin.dashboard');

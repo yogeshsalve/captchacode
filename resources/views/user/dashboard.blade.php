@@ -1,6 +1,18 @@
 @extends('layouts.app')
 
 @section('content')
+    @if (session('login_success'))
+        <script>
+            Swal.fire({
+                icon: 'success',
+                title: 'Login Successful',
+                text: 'Welcome back!',
+                showConfirmButton: false,
+                timer: 2000
+            });
+        </script>
+    @endif
+
     <div class="container">
 
         <h1>🙋 User Dashboard</h1>
@@ -36,63 +48,74 @@
                         Captcha Work
                     </div>
                     <div class="card-body" id="workArea">
-                       <!-- Start Work Button -->
-                       @php
-    $workStarted = Auth::user()->work_started === 'yes';
-@endphp
+                        <!-- Start Work Button -->
+                        @php
+                            $workStarted = Auth::user()->work_started === 'yes';
+                        @endphp
 
-<!-- Start Work Button - Only show if work has NOT started -->
-@if (!$workStarted)
-    <form id="startWorkForm" action="{{ route('start.work') }}" method="POST">
-        @csrf
-        <button type="submit" id="startBtn" class="btn btn-success">Start Work</button>
-    </form>
-@endif
-
-<!-- Captcha Form - Only show if work has started -->
-<div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-3">
-
-    <!-- Top-right Buttons with Icons -->
-    <div class="position-absolute top-2 end-0 mt-2 me-3 d-flex align-items-center">
-        <!-- Reload -->
-        <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
-            onclick="reloadCaptcha()" title="Reload Captcha">
-            <i class="fas fa-sync-alt"></i>
-        </button>
-
-        <!-- Pause -->
-        <button class="btn btn-sm btn-warning ms-2" title="Pause">
-            <i class="fas fa-pause"></i>
-        </button>
-
-        <!-- Stop -->
-        <button class="btn btn-sm btn-danger ms-2" title="Stop">
-            <i class="fas fa-stop"></i>
-        </button>
-
-        {{-- <div id="captcha-timer" class="ms-3 fw-bold text-primary" style="width: 30px;">10</div> --}}
-    </div>
+                        <!-- Start Work Button - Only show if work has NOT started -->
+                        @if (!$workStarted)
+                            <form id="startWorkForm" action="{{ route('start.work') }}" method="POST">
+                                @csrf
+                                <button type="submit" id="startBtn" class="btn btn-success">Start Work</button>
+                            </form>
+                        @endif
 
 
-    <img id="captchaImage" src="{{ captcha_src('default') }}" alt="Captcha" style="height: 60px;">
-    <input type="text" id="captcha-input" class="form-control mt-2" placeholder="Enter captcha" style="width: 150px; margin: 0 auto;">
-    <button class="btn btn-primary mt-2" id="captcha-submit">Submit</button>
-</div>
+                        <!-- Stop Work Form -->
+                        <div class="position-absolute top-0 end-0 mt-2 me-3">
+                            <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST" class="d-none">
+                                @csrf
+                                <button type="submit" id="stopBtn" class="btn btn-danger"> <i
+                                        class="fas fa-stop"></i>&nbsp;Stop Work</button>
+                            </form>
+                        </div>
 
-                            
-                            <div id="captcha-section">
-                               
+                        <!-- Captcha Form - Only show if work has started -->
+                        <div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-3">
 
+                            <!-- Top-right Buttons with Icons -->
+                            <div class="position-absolute top-2 end-0 mt-2 me-3 d-flex align-items-center">
+                                <!-- Reload -->
+                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
+                                    onclick="reloadCaptcha()" title="Reload Captcha">
+                                    <i class="fas fa-sync-alt"></i>
+                                </button>
+
+                                <!-- Pause -->
+                                <button class="btn btn-sm btn-warning ms-2" title="Pause">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+
+                                <!-- Stop -->
+                                <button class="btn btn-sm btn-danger ms-2" title="Stop">
+                                    <i class="fas fa-stop"></i>
+                                </button>
+
+                                {{-- <div id="captcha-timer" class="ms-3 fw-bold text-primary" style="width: 30px;">10</div> --}}
                             </div>
+
+
+                            <img id="captchaImage" src="{{ captcha_src('default') }}" alt="Captcha" style="height: 60px;">
+                            <input type="text" id="captcha-input" class="form-control mt-2" placeholder="Enter captcha"
+                                style="width: 250px; margin: 0 auto;">
+                            <button class="btn btn-primary mt-2" id="captcha-submit">Submit</button>
+                        </div>
+
+
+                        <div id="captcha-section">
+
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <hr>
-        <a href="" class="btn btn-success">
-            <i class="bi bi-download"></i> Download Report (Excel)
-        </a>
+    </div>
+    <hr>
+    <a href="" class="btn btn-success">
+        <i class="bi bi-download"></i> Download Report (Excel)
+    </a>
     </div>
 
 
@@ -105,34 +128,107 @@
         //     document.getElementById('captchaForm').classList.remove('d-none'); // Show Captcha Form
         // });
 
-        document.getElementById('startWorkForm')?.addEventListener('submit', function(e) {
-        e.preventDefault();
+        // document.getElementById('startWorkForm')?.addEventListener('submit', function(e) {
+        //     e.preventDefault();
 
-        let form = this;
-        let formData = new FormData(form);
+        //     let form = this;
+        //     let formData = new FormData(form);
 
-        fetch(form.action, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+        //     fetch(form.action, {
+        //             method: 'POST',
+        //             body: formData,
+        //             headers: {
+        //                 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+        //             }
+        //         })
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             if (data.success) {
+        //                 // Hide Start Button
+        //                 document.getElementById('startBtn').style.display = 'none';
+
+        //                 // Show Captcha Form
+        //                 document.getElementById('captchaForm').classList.remove('d-none');
+        //             }
+        //         })
+        //         .catch(error => {
+        //             console.error('Error:', error);
+        //         });
+        // });
+
+        >
+        document.getElementById('startWorkForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const form = this;
+            const formData = new FormData(form);
+            const startBtn = document.getElementById('startBtn');
+            const captchaForm = document.getElementById('captchaForm');
+
+            try {
+                const response = await fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Work Started',
+                        text: 'Please enter the captcha to continue.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                    // Option 1: Hide start button and show captcha (AJAX-based)
+                    startBtn?.classList.add('d-none');
+                    captchaForm?.classList.remove('d-none');
+
+                    // Optional: SweetAlert for confirmation
+
+
+                    // Optional: reload page if needed
+                    // setTimeout(() => window.location.reload(), 2000);
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Something went wrong',
+                        text: data.message || 'Please try again.',
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Network Error',
+                    text: 'Failed to start work. Please check your connection.',
+                });
             }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                // Hide Start Button
-                document.getElementById('startBtn').style.display = 'none';
-
-                // Show Captcha Form
-                document.getElementById('captchaForm').classList.remove('d-none');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
         });
-    });
     </script>
+
+
+    {{-- stop button  --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('startBtn');
+            const stopForm = document.getElementById('stopWorkForm');
+            const captchaForm = document.getElementById('captchaForm');
+
+            // If work started (set from backend), show stop button and captcha form
+            @if (Auth::user()->work_started == 'yes')
+                stopForm.classList.remove('d-none');
+            @endif
+        });
+    </script>
+
 
     <script>
         $(document).ready(function() {
@@ -192,52 +288,27 @@
 
         });
     </script>
-    {{-- 
-<script>
-    let captchaInterval;
-    let countdownInterval;
-    let timeLeft = 10;
-    let isPaused = false;
 
-    function reloadCaptcha() {
 
-      
-        const captchaImage = document.getElementById('captchaImage');
-        captchaImage.src = '{{ captcha_src('default') }}?' + Math.random();
-    }
 
-    function updateTimerDisplay() {
-        document.getElementById('captcha-timer').textContent = timeLeft;
-    }
 
-    function startCaptchaAutoReload() {
-        updateTimerDisplay();
-
-        countdownInterval = setInterval(() => {
-            if (!isPaused) {
-                timeLeft--;
-                if (timeLeft <= 0) {
-                    reloadCaptcha();
-                    timeLeft = 10;
-                }
-                updateTimerDisplay();
-            }
-        }, 1000);
-    }
-
-    function toggleCaptchaAutoReload() {
-        isPaused = !isPaused;
-
-        const pauseBtn = document.getElementById('pauseCaptchaBtn');
-        if (isPaused) {
-            pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-            pauseBtn.title = "Resume";
-        } else {
-            pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            pauseBtn.title = "Pause";
-        }
-    }
-
-    document.addEventListener('DOMContentLoaded', startCaptchaAutoReload);
-</script> --}}
+    <script>
+        @if (session('work_status') == 'started')
+            Swal.fire({
+                icon: 'success',
+                title: 'Work Started',
+                text: 'You have successfully started work!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @elseif (session('work_status') == 'stopped')
+            Swal.fire({
+                icon: 'info',
+                title: 'Work Stopped',
+                text: 'You have successfully stopped work.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        @endif
+    </script>
 @endsection

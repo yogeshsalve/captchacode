@@ -14,9 +14,11 @@ class UserController extends Controller
         if (Auth::user()->role != 2) {
             abort(403, 'Unauthorized');
         }
+      
         $captcha_image = captcha_src('default'); // Just the image URL
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
+            
         ]);
     }
 
@@ -25,7 +27,16 @@ class UserController extends Controller
         $user = Auth::user();
          $user->work_started = 'yes';
          $user->save();
-
+         
          return redirect()->back();
+    }
+
+    public function stopWork()
+    {
+        $user = Auth::user();
+        $user->work_started = 'no';
+        $user->save();
+      
+        return redirect()->back();
     }
 }

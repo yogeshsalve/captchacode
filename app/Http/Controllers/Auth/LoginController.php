@@ -44,11 +44,14 @@ class LoginController extends Controller
              case 1:
                  return route('admin.dashboard');
              case 2:
-                 return route('user.dashboard');
+                return route('user.dashboard');
              default:
                  return '/home'; // fallback
          }
     }
+
+
+   
 
     public function __construct()
     {
