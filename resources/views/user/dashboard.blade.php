@@ -57,20 +57,21 @@
                         @if (!$workStarted)
                             <form id="startWorkForm" action="{{ route('start.work') }}" method="POST">
                                 @csrf
+                                <div class="position-absolute top-2 end-0 mt-2 me-3 d-flex align-items-center">
                                 <button type="submit" id="startBtn" class="btn btn-success">Start Work</button>
+                                </div>
+
+                                <div class="container py-5">
+                                    <h3 class="mb-4 text-center">📈 Captcha Activity Overview</h3>
+                                    <canvas id="activityChart" height="100"></canvas>
+                                </div>
+                                
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                             </form>
                         @endif
 
 
-                        <!-- Stop Work Form -->
-                        <div class="position-absolute top-0 end-0 mt-2 me-3">
-                            <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST" class="d-none">
-                                @csrf
-                                <button type="submit" id="stopBtn" class="btn btn-danger"> <i
-                                        class="fas fa-stop"></i>&nbsp;Stop Work</button>
-                            </form>
-                        </div>
-
+                       
                         <!-- Captcha Form - Only show if work has started -->
                         <div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-3">
 
@@ -88,9 +89,12 @@
                                 </button>
 
                                 <!-- Stop -->
-                                <button class="btn btn-sm btn-danger ms-2" title="Stop">
-                                    <i class="fas fa-stop"></i>
-                                </button>
+                                <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST" class="d-none">
+                                    @csrf
+                                    <button class="btn btn-sm btn-danger ms-2" title="Stop">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </form>
 
                                 {{-- <div id="captcha-timer" class="ms-3 fw-bold text-primary" style="width: 30px;">10</div> --}}
                             </div>
@@ -291,24 +295,50 @@
 
 
 
+{{-- chart --}}
+<script>
+    const chartData = @json($activity_data);
 
-    <script>
-        @if (session('work_status') == 'started')
-            Swal.fire({
-                icon: 'success',
-                title: 'Work Started',
-                text: 'You have successfully started work!',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        @elseif (session('work_status') == 'stopped')
-            Swal.fire({
-                icon: 'info',
-                title: 'Work Stopped',
-                text: 'You have successfully stopped work.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        @endif
-    </script>
+    const labels = chartData.map(item => item.date);
+    const correct = chartData.map(item => item.correct_count);
+    const incorrect = chartData.map(item => item.incorrect_count);
+
+    const ctx = document.getElementById('activityChart').getContext('2d');
+    const activityChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Correct Captchas',
+                    data: correct,
+                    backgroundColor: 'rgba(40, 167, 69, 0.6)',
+                    borderColor: 'rgba(40, 167, 69, 1)',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Incorrect Captchas',
+                    data: incorrect,
+                    backgroundColor: 'rgba(220, 53, 69, 0.6)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
+                    borderWidth: 1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                x: { stacked: true },
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Number of Captchas'
+                    }
+                }
+            }
+        }
+    });
+</script>
 @endsection

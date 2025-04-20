@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Mews\Captcha\Facades\Captcha;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -16,9 +17,21 @@ class UserController extends Controller
         }
       
         $captcha_image = captcha_src('default'); // Just the image URL
+        $userId = auth()->id();
+        $activityData = DB::table('captcha_logs')
+        ->selectRaw('DATE(created_at) as date, 
+                     SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+                     SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count')
+        ->where('user_id', $userId)
+        ->groupBy('date')
+        ->orderBy('date', 'ASC')
+        ->get();
+       
+
+
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
-            
+            'activity_data' => $activityData
         ]);
     }
 
