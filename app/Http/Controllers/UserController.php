@@ -22,6 +22,10 @@ class UserController extends Controller
 
     public function startWork()
     {
-        return "You have started working!";
+        $user = Auth::user();
+         $user->work_started = 'yes';
+         $user->save();
+
+         return redirect()->back();
     }
 }

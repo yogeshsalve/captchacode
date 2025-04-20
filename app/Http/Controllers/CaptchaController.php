@@ -8,16 +8,12 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Mews\Captcha\Facades\Captcha;
 use App\Models\CaptchaLog;
+use App\Models\User;
 
 class CaptchaController extends Controller
 {
     
-    public function startWork(Request $request)
-    {
-        session(['work_started' => true]);
-        return redirect()->back();
-    }
-  
+     
 
     // Method to verify the entered captcha
     public function verifyCaptcha(Request $request)

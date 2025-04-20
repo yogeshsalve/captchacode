@@ -12,9 +12,8 @@ class CaptchaLog extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
-        'captcha_text',
-        'entered_captcha',
+        'user_id',       
         'status',
+        'work_started'
     ];
 }
