@@ -24,6 +24,12 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
+  // Show the edit amount form
+Route::get('/user/{id}/edit-amount', [App\Http\Controllers\AdminController::class, 'editAmount'])->name('user.editAmount');
+
+// Update the amount in the user table
+Route::post('/admin/users/{id}/update-amount', [App\Http\Controllers\AdminController::class, 'updateAmount'])->name('user.updateAmount');;
+
 
     Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/captcha-stats', [App\Http\Controllers\UserController::class, 'getCaptchaStats'])->name('user.captcha.stats');

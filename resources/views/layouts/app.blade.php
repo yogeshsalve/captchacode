@@ -37,6 +37,7 @@
         
                     <!-- Left Side Buttons (shifted with margin) -->
                     @auth
+                    @if (Auth::user()->role == 2)
                     <div class="ms-5 d-flex align-items-center gap-2">
                         @php
                             $workStarted = Auth::user()->work_started === 'yes';
@@ -54,6 +55,7 @@
                         <a href="#" class="btn btn-outline-primary">Payout</a>
                         <a href="#" class="btn btn-outline-secondary">Softwares</a>
                     </div>
+                    @endif
                     @endauth
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">

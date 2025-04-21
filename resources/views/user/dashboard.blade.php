@@ -5,10 +5,57 @@
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
             <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
-            <a href="#" class="btn btn-primary">
+            {{-- <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
+                onclick="syncEarnedToModal()">
                 <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned"></span>
+            </a> --}}
+            <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
+                onclick="syncEarnedToModal()" id="earnedButton">
+                <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned">0</span>
             </a>
         </div>
+
+
+        <!-- Modal -->
+      <!-- Modal -->
+<div class="modal fade" id="earnedModal" tabindex="-1" aria-labelledby="earnedModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="earnedModalLabel">Earnings Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <!-- Left Column: QR Code & Add Money -->
+                    <div class="col-md-6 text-center">
+                        <h4 class="text-danger">Your wallet balance is low!</h4>
+                        <p class="fs-4">Total Earnings: ₹ <span id="totalEarnedModal"></span></p>
+
+                        <!-- QR Code for Adding Money -->
+                        <div id="addMoneySection" class="d-none">
+                            <img src="{{ asset('images/taskitqr.jpeg') }}" alt="QR Code" class="img-fluid rounded shadow"
+                                style="max-width: 250px;">
+                            <p class="text-muted mt-3 small">Scan using any UPI app (PhonePe, GPay, Paytm)</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Withdrawal Request -->
+                    <div class="col-md-6">
+                        <h4>Request Withdrawal</h4>
+                        <p id="withdrawal-message" class="text-muted">Withdraw funds to your bank account.</p>
+
+                        <button id="withdrawButton" class="btn btn-warning w-100" disabled>
+                            Request Withdrawal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 
         <!-- Welcome Message -->
         <p class="lead text-muted mb-4">Welcome to your dashboard. You can manage your account and activity.</p>
@@ -26,15 +73,19 @@
                         <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
                         <p><strong>Registered On:</strong>
                             {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}</p>
-                        <p><strong>Plan:</strong> <strong style="color: green;">STANDARD</strong> &nbsp; <strong style="color: blue;">VALID TILL :{{ \Carbon\Carbon::parse(Auth::user()->created_at)->addDays(30)->format('d F Y') }}
-                        </strong></p>
+                        <p><strong>Plan:</strong> <strong style="color: green;">STANDARD</strong> &nbsp; <strong
+                                style="color: blue;">VALID TILL
+                                :{{ \Carbon\Carbon::parse(Auth::user()->created_at)->addDays(30)->format('d F Y') }}
+                            </strong></p>
                         <p><strong>Total Captcha:</strong> <span id="totalCaptchas">0</span> / 15000</p>
 
                         <!-- Buttons -->
                         <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
-                            <a href="#" class="btn btn-success" style="width: 150px;"><span id="correctCount">0</span></a>
-                            <a href="#" class="btn btn-danger" style="width: 150px;"><span id="incorrectCount">0</span></a>
-                        </div>                      
+                            <a href="#" class="btn btn-success" style="width: 150px;"><span
+                                    id="correctCount">0</span></a>
+                            <a href="#" class="btn btn-danger" style="width: 150px;"><span
+                                    id="incorrectCount">0</span></a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -85,6 +136,11 @@
                             <input type="text" name="captcha" id="captcha-input" class="form-control mx-auto"
                                 placeholder="Enter captcha" style="max-width: 300px;" required>
                             <button class="btn btn-primary mt-3" id="captcha-submit">Submit</button>
+
+                            <!-- Red warning message -->
+                            <p id="wallet-warning" class="text-danger mt-2" style="display: none;">
+                               <strong>To Start Earning, Add Money in Your Wallet.</strong>
+                            </p>
                         </div>
 
                         <div id="captcha-section"></div>
@@ -233,41 +289,91 @@
     </script>
 
 
-<script>
-    function fetchCaptchaStats() {
-        $.ajax({
-            url: "{{ route('user.captcha.stats') }}",
-            type: "GET",
-            success: function(data) {
-                $('#totalCaptchas').text(data.total_captchas);
-                $('#correctCount').text(data.correct_count);
-                $('#incorrectCount').text(data.incorrect_count);
-            }
-        });
-    }
+    <script>
+        function fetchCaptchaStats() {
+            $.ajax({
+                url: "{{ route('user.captcha.stats') }}",
+                type: "GET",
+                success: function(data) {
+                    $('#totalCaptchas').text(data.total_captchas);
+                    $('#correctCount').text(data.correct_count);
+                    $('#incorrectCount').text(data.incorrect_count);
+                }
+            });
+        }
 
-    // Fetch every 5 seconds
-    setInterval(fetchCaptchaStats, 5000);
-    fetchCaptchaStats(); // Initial load
-</script>
+        // Fetch every 5 seconds
+        setInterval(fetchCaptchaStats, 5000);
+        fetchCaptchaStats(); // Initial load
+    </script>
 
 
-<script>
-    function earnedSum() {
-        $.ajax({
-            url: "{{ route('user.earnedSum') }}",
-            type: "GET",
-            success: function(data) {
-                console.log("Earned Sum Response:", data);
-                $('#totalEarned').text(data.total_earned);
-              
-            }
-        });
-    }
+    <script>
 
-    // Fetch every 5 seconds
-    setInterval(earnedSum, 5000);
-    earnedSum(); // Initial load
-</script>
 
+        function earnedSum() {
+            $.ajax({
+                url: "{{ route('user.earnedSum') }}",
+                type: "GET",
+                success: function(data) {
+                    let earned = parseFloat(data.total_earned) || 0;
+
+                    // Update both span and modal
+                    $('#totalEarned').text(earned.toFixed(2));
+                    $('#totalEarnedModal').text(earned.toFixed(2));
+
+                    // Conditionally change button text
+                    if (earned <= 0) {
+                        $('#earnedButton').html('<i class="fas fa-wallet me-2"></i> Add Rs. 1000');
+                        $('#captcha-input').prop('disabled', true);
+                        $('#captcha-submit').attr('disabled', 'disabled').addClass('disabled');
+                        $('#wallet-warning').show();
+
+                        // Show QR in modal
+                        $('#addMoneySection').removeClass('d-none');
+                    } else {
+                        $('#earnedButton').html('<i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned">' +
+                            earned.toFixed(2) + '</span>');
+                        $('#captcha-input').prop('disabled', false);
+                        $('#captcha-submit').removeAttr('disabled').removeClass('disabled');
+                        $('#wallet-warning').hide();
+
+                        // Show QR in modal
+                        $('#addMoneySection').addClass('d-none');
+                    }
+                },
+                error: function(xhr) {
+                    console.error("Error fetching earned sum:", xhr.responseText);
+                }
+            });
+        }
+
+        function syncEarnedToModal() {
+            const earned = $('#totalEarned').text();
+            $('#totalEarnedModal').text(earned);
+        }
+
+        setInterval(earnedSum, 5000);
+        earnedSum(); // Initial call
+    </script>
+
+
+
+    {{-- <script>
+        function earnedSum() {
+            $.ajax({
+                url: "{{ route('user.earnedSum') }}",
+                type: "GET",
+                success: function(data) {
+                    console.log("Earned Sum Response:", data);
+                    $('#totalEarned').text(data.total_earned);
+
+                }
+            });
+        }
+
+        // Fetch every 5 seconds
+        setInterval(earnedSum, 5000);
+        earnedSum(); // Initial load
+    </script> --}}
 @endsection
