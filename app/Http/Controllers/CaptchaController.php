@@ -18,32 +18,30 @@ class CaptchaController extends Controller
     // Method to verify the entered captcha
     public function verifyCaptcha(Request $request)
     {
+
+
+        \Log::info('Captcha input:', ['input' => $request->captcha]);
+
         $validator = Validator::make($request->all(), [
             'captcha' => 'required|captcha',
         ]);
 
         $status = $validator->fails() ? 'incorrect' : 'correct';
+        $earned = $status === 'correct' ? 0.50 : -0.25;
     // Store in DB
     CaptchaLog::create([
         'user_id' => Auth::check() ? Auth::id() : null,
         'status' => $status,
+        'earned' => $earned,
     ]);
     
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'CAPTCHA incorrect.']);
-        }
+        if ($status == "incorrect") {
+            return response()->json(['success' => false, 'message' => 'INCORRECT CAPTCHA']);
+        }else{
     
-        return response()->json(['success' => true, 'message' => 'CAPTCHA correct!']);
+        return response()->json(['success' => true, 'message' => 'CORRECT CAPTCHA']);
+        }
     }
 
-    // Method to reload captcha
-    public function reloadCaptcha()
-    {
-        [$image, $code] = Captcha::create('default', true);
-
-        return response()->json([
-            'image' => $image,
-            'code' => $code // ⚠️ Only for testing or to store in hidden field
-        ]);
-    }
+   
 }

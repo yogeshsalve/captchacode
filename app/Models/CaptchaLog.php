@@ -14,6 +14,7 @@ class CaptchaLog extends Model
     protected $fillable = [
         'user_id',       
         'status',
-        'work_started'
+        'work_started',
+        'earned'
     ];
 }

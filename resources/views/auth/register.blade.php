@@ -5,7 +5,10 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
+                <div class="card-header text-center">
+                    <img src="{{ asset('images/taskit.png') }}" alt="Logo" style="height: 60px;">
+                    <h4 class="mt-2">{{ __('Register') }}</h4>
+                </div>
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('register') }}">
@@ -38,6 +41,21 @@
                                 @enderror
                             </div>
                         </div>
+
+                        <div class="row mb-3">
+                            <label for="mobile" class="col-md-4 col-form-label text-md-end">{{ __('Mobile Number') }}</label>
+                        
+                            <div class="col-md-6">
+                                <input id="mobile" type="text" class="form-control @error('mobile') is-invalid @enderror" name="mobile" value="{{ old('mobile') }}" required autocomplete="tel">
+                        
+                                @error('mobile')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                        
 
                         <div class="row mb-3">
                             <label for="password" class="col-md-4 col-form-label text-md-end">{{ __('Password') }}</label>

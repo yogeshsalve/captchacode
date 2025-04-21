@@ -5,7 +5,12 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">{{ __('Login') }}</div>
+                {{-- <div class="card-header">{{ __('Login') }}</div> --}}
+                <div class="card-header text-center">
+                    <img src="{{ asset('images/taskit.png') }}" alt="Logo" style="height: 60px;">
+                    <h4 class="mt-2">{{ __('Login') }}</h4>
+                </div>
+            
 
                 <div class="card-body">
                     <form method="POST" action="{{ route('login') }}">

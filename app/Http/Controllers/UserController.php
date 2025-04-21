@@ -15,25 +15,64 @@ class UserController extends Controller
         if (Auth::user()->role != 2) {
             abort(403, 'Unauthorized');
         }
-      
-        $captcha_image = captcha_src('default'); // Just the image URL
-        $userId = auth()->id();
+    
+        $user = Auth::user();
+        $totalCaptchas = DB::table('captcha_logs')
+            ->where('user_id', $user->id)
+            ->count();
+
+
+        $earnedSum = DB::table('captcha_logs')
+        ->where('user_id', auth()->id())
+        ->sum('earned');
+    
+        // Use 'easy' captcha for first 500, then 'complex'
+        $captchaType = $totalCaptchas < 500 ? 'easy' : 'default'; // change 'default' to 'complex' if you defined it
+    
+        $captcha_image = captcha_src($captchaType);
+    
         $activityData = DB::table('captcha_logs')
-        ->selectRaw('DATE(created_at) as date, 
-                     SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
-                     SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count')
-        ->where('user_id', $userId)
-        ->groupBy('date')
-        ->orderBy('date', 'ASC')
-        ->get();
-       
+            ->selectRaw('DATE(created_at) as date, 
+                        SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+                        SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count')
+            ->where('user_id', $user->id)
+            ->groupBy('date')
+            ->orderBy('date', 'ASC')
+            ->get();
 
-
+            $captchaStats = DB::table('captcha_logs')
+            ->selectRaw('
+                COUNT(*) as total_captchas,
+                SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+                SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count
+            ')
+            ->where('user_id', auth()->id())
+            ->first();
+        
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
-            'activity_data' => $activityData
+            'activity_data' => $activityData,
+            'earned_sum' => $earnedSum,
+            'captchaStats' => $captchaStats,
         ]);
     }
+
+
+    public function getCaptchaStats()
+{
+    $userId = auth()->id();
+
+    $stats = DB::table('captcha_logs')
+        ->selectRaw('
+            COUNT(*) as total_captchas,
+            SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+            SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count
+        ')
+        ->where('user_id', $userId)
+        ->first();
+
+    return response()->json($stats);
+}
 
     public function startWork()
     {

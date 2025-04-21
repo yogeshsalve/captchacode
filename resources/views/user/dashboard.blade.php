@@ -1,122 +1,107 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container my-3">
-        <h1>🙋 User Dashboard</h1>
-
-        <div class="d-flex justify-content-between align-items-center">
-            <p class="mb-0">Welcome to your dashboard. You can manage your account and activity.</p>
-
+    <div class="container my-4">
+        <!-- Header -->
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
             <a href="#" class="btn btn-primary">
-                <i class="fas fa-wallet me-1"></i> ₹ 131.50
+                <i class="fas fa-wallet me-2"></i> ₹ {{ $earned_sum }}
             </a>
         </div>
-    </div>
 
+        <!-- Welcome Message -->
+        <p class="lead text-muted mb-4">Welcome to your dashboard. You can manage your account and activity.</p>
 
-    <div class="container mt-2">
-        <div class="row">
-            <!-- Left Column -->
+        <!-- Cards Section -->
+        <div class="row g-4">
+            <!-- Profile Card -->
             <div class="col-md-4">
-                <div class="card shadow-sm">
+                <div class="card shadow-sm h-100">
                     <div class="card-header bg-primary text-white">
-                        My Profile
+                        <h5 class="mb-0">My Profile</h5>
                     </div>
                     <div class="card-body">
-
-                        {{-- @php
-                            $workStarted = Auth::user()->work_started === 'yes';
-                        @endphp
-                        @if (!$workStarted)
-                            <form id="startWorkForm" action="{{ route('start.work') }}" method="POST">
-                                @csrf
-                                <div class="position-absolute top-2 end-0 mt-2 me-3 d-flex align-items-center">
-                                    <button type="submit" id="startBtn" class="btn btn-success">Start Work</button>
-                                </div>
-                            </form>
-                        @endif --}}
-
                         <p><strong>Name:</strong> {{ Auth::user()->name }}</p>
                         <p><strong>Email:</strong> {{ Auth::user()->email }}</p>
-                        <p><strong>Registered On :</strong>
+                        <p><strong>Registered On:</strong>
                             {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}</p>
-                        <p><strong>Plan:</strong> Plan A &nbsp; <a href="">Upgrade Plan</a></p>
-                        <p><strong>Total Captcha:</strong> 1002 / 10000</p>
+                        <p><strong>Plan:</strong> <strong style="color: green;">STANDARD</strong> &nbsp; <strong style="color: blue;">VALID TILL :{{ \Carbon\Carbon::parse(Auth::user()->created_at)->addDays(30)->format('d F Y') }}
+                        </strong></p>
+                        <p><strong>Total Captcha:</strong> <span id="totalCaptchas">0</span> / 15000</p>
 
+                        <!-- Buttons -->
+                        <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                            <a href="#" class="btn btn-success" style="width: 150px;"><span id="correctCount">0</span></a>
+                            <a href="#" class="btn btn-danger" style="width: 150px;"><span id="incorrectCount">0</span></a>
+                        </div>
+
+
+                        {{-- <div id="captcha-stats">
+                            <p><strong>Total Captchas:</strong> <span id="totalCaptchas">0</span></p>
+                            <p><strong>Correct:</strong> <span id="correctCount">0</span></p>
+                            <p><strong>Incorrect:</strong> <span id="incorrectCount">0</span></p>
+                        </div> --}}
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column -->
+            <!-- Captcha Work Card -->
             <div class="col-md-8">
-                <div class="card shadow-sm text-center">
-                    <div class="card-header bg-primary text-white">
-                        Captcha Work
+                <div class="card shadow-sm h-100">
+                    <div class="card-header bg-primary text-white text-center">
+                        <h5 class="mb-0">Captcha Work</h5>
                     </div>
-                    <div class="card-body" id="workArea">
-                        <!-- Start Work Button -->
+                    <div class="card-body position-relative">
                         @php
                             $workStarted = Auth::user()->work_started === 'yes';
                         @endphp
 
-                        <!-- Start Work Button - Only show if work has NOT started -->
                         @if (!$workStarted)
+                            <!-- Chart Section -->
                             <div class="container py-1">
-                                <h3 class="mb-4 text-center">📈 Captcha Activity Overview</h3>
-                                <canvas id="activityChart" height="70"></canvas>
+                                <h5 class="text-center mb-3">📈 Captcha Activity Overview</h5>
+                                <canvas id="activityChart" height="80"></canvas>
+                                <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                             </div>
-
-                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                            </form>
                         @endif
 
+                        <!-- Captcha Form -->
+                        <div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-4 text-center">
 
-
-                        <!-- Captcha Form - Only show if work has started -->
-                        <div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-3">
-
-                            <!-- Top-right Buttons with Icons -->
-                            <div class="position-absolute top-2 end-0 mt-2 me-3 d-flex align-items-center">
-                                <!-- Reload -->
-                                <button type="button" class="btn btn-sm btn-outline-secondary ms-2"
+                            <!-- Top-right Button Row -->
+                            <div class="position-absolute top-0 end-0 mt-2 me-3 d-flex">
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1"
                                     onclick="reloadCaptcha()" title="Reload Captcha">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
-
-                                <!-- Pause -->
-                                <button class="btn btn-sm btn-warning ms-2" title="Pause">
+                                <button class="btn btn-sm btn-warning me-1" title="Pause">
                                     <i class="fas fa-pause"></i>
                                 </button>
-
-                                <!-- Stop -->
-                                <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST" class="d-none">
+                                <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST">
                                     @csrf
-                                    <button class="btn btn-sm btn-danger ms-2" title="Stop">
+                                    <button class="btn btn-sm btn-danger" title="Stop">
                                         <i class="fas fa-stop"></i>
                                     </button>
                                 </form>
-
-                                {{-- <div id="captcha-timer" class="ms-3 fw-bold text-primary" style="width: 30px;">10</div> --}}
                             </div>
 
-
-                            <img id="captchaImage" src="{{ captcha_src('default') }}" alt="Captcha" style="height: 60px;">
-                            <input type="text" id="captcha-input" class="form-control mt-2" placeholder="Enter captcha"
-                                style="width: 250px; margin: 0 auto;">
-                            <button class="btn btn-primary mt-2" id="captcha-submit">Submit</button>
+                            <!-- Captcha Display -->
+                            <img id="captchaImage" src="{{ $captcha_image }}" alt="Captcha" class="my-3"
+                                style="height: 60px;">
+                            <input type="text" name="captcha" id="captcha-input" class="form-control mx-auto"
+                                placeholder="Enter captcha" style="max-width: 300px;" required>
+                            <button class="btn btn-primary mt-3" id="captcha-submit">Submit</button>
                         </div>
 
-
-                        <div id="captcha-section">
-
-
-                        </div>
+                        <div id="captcha-section"></div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
+
+
 
 
     <!-- JS -->
@@ -157,17 +142,22 @@
                         captcha: captcha
                     },
                     success: function(response) {
+
+                        console.log("Response:", response);
+
                         $('#captcha-input').val('');
                         if (response.success) {
                             Swal.fire({
                                 icon: 'success',
-                                title: 'Correct!',
+                                title: 'Congratulations 50 Paise Credited !!',
                                 text: response.message
                             });
+
+                            reloadCaptcha();
                         } else {
                             Swal.fire({
                                 icon: 'error',
-                                title: 'Incorrect!',
+                                title: 'Oops,  25 Paise Deducted !!',
                                 text: response.message
                             });
 
@@ -190,11 +180,10 @@
 
 
             window.reloadCaptcha = function() {
-                $('#captchaImage').attr('src', '{{ captcha_src('default') }}?' + Math.random());
-
-                // Auto reload every 10 seconds
-                setInterval(reloadCaptcha, 15000);
-            }
+                $.get('/reload-captcha', function(data) {
+                    $('#captchaImage').attr('src', data.captcha);
+                });
+            };
 
 
         });
@@ -212,7 +201,7 @@
 
         const ctx = document.getElementById('activityChart').getContext('2d');
         const activityChart = new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
@@ -249,4 +238,23 @@
             }
         });
     </script>
+
+
+<script>
+    function fetchCaptchaStats() {
+        $.ajax({
+            url: "{{ route('user.captcha.stats') }}",
+            type: "GET",
+            success: function(data) {
+                $('#totalCaptchas').text(data.total_captchas);
+                $('#correctCount').text(data.correct_count);
+                $('#incorrectCount').text(data.incorrect_count);
+            }
+        });
+    }
+
+    // Fetch every 5 seconds
+    setInterval(fetchCaptchaStats, 5000);
+    fetchCaptchaStats(); // Initial load
+</script>
 @endsection

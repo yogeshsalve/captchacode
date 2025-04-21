@@ -12,6 +12,18 @@ return [
         'expire' => 60,
         'encrypt' => false,
     ],
+
+    'easy' => [
+    'length' => 4,
+    'width' => 120,
+    'height' => 36,
+    'quality' => 90,
+    'bgColor' => '#ffffff',
+    'lines' => 2,
+    'contrast' => 0,
+    'sharpen' => 0,
+    'angle' => 0,
+],
     'math' => [
         'length' => 9,
         'width' => 120,

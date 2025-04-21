@@ -26,6 +26,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
 
     Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
+    Route::get('/user/captcha-stats', [App\Http\Controllers\UserController::class, 'getCaptchaStats'])->name('user.captcha.stats');
     Route::post('/start-work', [App\Http\Controllers\UserController::class, 'startWork'])->name('start.work');
     Route::post('/stop-work', [App\Http\Controllers\UserController::class, 'stopWork'])->name('stop.work');
 });
@@ -36,15 +37,40 @@ Route::get('/superadmin/dashboard', fn() => view('superadmin.dashboard'))->name(
 
 
 
-// Route::get('/generate-captcha', function () {
-//     return Captcha::create('default');
-// })->name('captcha.generate');
 
-Route::post('/verify-captcha', [App\Http\Controllers\CaptchaController::class, 'verifyCaptcha'])->name('captcha.verify');
-Route::get('/reload-captcha', [App\Http\Controllers\CaptchaController::class, 'reloadCaptcha'])->name('reload.captcha');
-// Route::get('/reload-captcha', function () {
-//     return response()->json(['captcha' => captcha_src('default')]);
-// })->name('reload.captcha');
 
+Route::post('/verify-captcha', [App\Http\Controllers\CaptchaController::class, 'verifyCaptcha'])->name('captcha.verify')->middleware('web');
+
+Route::get('/reload-captcha', function () {
+    $user = Auth::user();
+
+    if (!$user) {
+        return response()->json(['captcha' => captcha_src('default') . '?' . rand()]);
+    }
+
+    $totalCaptchas = DB::table('captcha_logs')
+        ->where('user_id', $user->id)
+        ->count();
+
+    $captchaType = $totalCaptchas < 500 ? 'easy' : 'default';
+
+    return response()->json(['captcha' => captcha_src($captchaType) . '?' . rand()]);
+});
+
+// Route::get('/refresh-captcha', function () {
+//     $user = Auth::user();
+
+//     if (!$user) {
+//         return response()->json(['captcha' => captcha_src('default') . '?' . rand()]);
+//     }
+
+//     $totalCaptchas = DB::table('captcha_logs')
+//         ->where('user_id', $user->id)
+//         ->count();
+
+//     $captchaType = $totalCaptchas < 500 ? 'easy' : 'default';
+
+//     return response()->json(['captcha' => captcha_src($captchaType) . '?' . rand()]);
+// });
 
 
