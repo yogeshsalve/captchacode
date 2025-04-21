@@ -22,9 +22,9 @@ class UserController extends Controller
             ->count();
 
 
-        $earnedSum = DB::table('captcha_logs')
-        ->where('user_id', auth()->id())
-        ->sum('earned');
+        // $earnedSum = DB::table('captcha_logs')
+        // ->where('user_id', auth()->id())
+        // ->sum('earned');
     
         // Use 'easy' captcha for first 500, then 'complex'
         $captchaType = $totalCaptchas < 500 ? 'easy' : 'default'; // change 'default' to 'complex' if you defined it
@@ -52,11 +52,22 @@ class UserController extends Controller
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
             'activity_data' => $activityData,
-            'earned_sum' => $earnedSum,
+            // 'earned_sum' => $earnedSum,
             'captchaStats' => $captchaStats,
         ]);
     }
 
+    public function earnedSum()
+    {
+        $earnedSumm = DB::table('captcha_logs')
+        ->selectRaw('
+            SUM(earned) as total_earned
+            ')
+            ->where('user_id', auth()->id())
+            ->first();
+    
+        return response()->json($earnedSumm);
+    }
 
     public function getCaptchaStats()
 {

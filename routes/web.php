@@ -27,6 +27,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');
     Route::get('/user/captcha-stats', [App\Http\Controllers\UserController::class, 'getCaptchaStats'])->name('user.captcha.stats');
+    Route::get('/user/earnedSum', [App\Http\Controllers\UserController::class, 'earnedSum'])->name('user.earnedSum');
     Route::post('/start-work', [App\Http\Controllers\UserController::class, 'startWork'])->name('start.work');
     Route::post('/stop-work', [App\Http\Controllers\UserController::class, 'stopWork'])->name('stop.work');
 });

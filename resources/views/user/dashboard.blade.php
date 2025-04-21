@@ -6,7 +6,7 @@
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
             <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
             <a href="#" class="btn btn-primary">
-                <i class="fas fa-wallet me-2"></i> ₹ {{ $earned_sum }}
+                <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned"></span>
             </a>
         </div>
 
@@ -34,14 +34,7 @@
                         <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
                             <a href="#" class="btn btn-success" style="width: 150px;"><span id="correctCount">0</span></a>
                             <a href="#" class="btn btn-danger" style="width: 150px;"><span id="incorrectCount">0</span></a>
-                        </div>
-
-
-                        {{-- <div id="captcha-stats">
-                            <p><strong>Total Captchas:</strong> <span id="totalCaptchas">0</span></p>
-                            <p><strong>Correct:</strong> <span id="correctCount">0</span></p>
-                            <p><strong>Incorrect:</strong> <span id="incorrectCount">0</span></p>
-                        </div> --}}
+                        </div>                      
                     </div>
                 </div>
             </div>
@@ -257,4 +250,24 @@
     setInterval(fetchCaptchaStats, 5000);
     fetchCaptchaStats(); // Initial load
 </script>
+
+
+<script>
+    function earnedSum() {
+        $.ajax({
+            url: "{{ route('user.earnedSum') }}",
+            type: "GET",
+            success: function(data) {
+                console.log("Earned Sum Response:", data);
+                $('#totalEarned').text(data.total_earned);
+              
+            }
+        });
+    }
+
+    // Fetch every 5 seconds
+    setInterval(earnedSum, 5000);
+    earnedSum(); // Initial load
+</script>
+
 @endsection
