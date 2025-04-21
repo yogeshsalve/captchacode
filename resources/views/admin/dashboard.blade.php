@@ -59,7 +59,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="editAmountForm">
-                        <input type="text" id="userIdInput" name="user_id">
+                        <input type="hidden" id="userIdInput" name="user_id">
                         <div class="mb-3">
                             <label for="amountInput" class="form-label">Amount</label>
                             <input type="number" class="form-control" id="amountInput" name="amount" required>

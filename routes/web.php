@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
 
 Auth::routes();
@@ -33,6 +33,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/earnedSum', [App\Http\Controllers\UserController::class, 'earnedSum'])->name('user.earnedSum');
     Route::post('/start-work', [App\Http\Controllers\UserController::class, 'startWork'])->name('start.work');
     Route::post('/stop-work', [App\Http\Controllers\UserController::class, 'stopWork'])->name('stop.work');
+
+   
 });
 
 Route::get('/superadmin/dashboard', fn() => view('superadmin.dashboard'))->name('superadmin.dashboard');

@@ -1,14 +1,65 @@
 @extends('layouts.app')
 
 @section('content')
+
+<style>
+    .modal.right .modal-dialog {
+        position: fixed;
+        margin: auto;
+        width: 50%;
+        height: 100%;
+        right: 0;
+        top: 0;
+        transform: translateX(100%);
+        transition: transform 0.3s ease-out;
+    }
+
+    .modal.right.show .modal-dialog {
+        transform: translateX(0);
+    }
+
+    .modal.right .modal-content {
+        height: 100%;
+        overflow-y: auto;
+        border-radius: 0;
+    }
+
+    .modal.right .modal-header {
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .modal.right .modal-body {
+        padding: 2rem;
+    }
+
+    .wallet-warning {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #dc3545;
+    }
+
+    .earnings-amount {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+    }
+
+    .qr-image {
+        max-width: 200px;
+        margin: 1rem auto;
+    }
+
+    .upi-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+</style>
+
+
     <div class="container my-4">
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
-            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
-            {{-- <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
-                onclick="syncEarnedToModal()">
-                <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned"></span>
-            </a> --}}
+            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>          
             <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
                 onclick="syncEarnedToModal()" id="earnedButton">
                 <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned">0</span>
@@ -17,48 +68,50 @@
 
 
         <!-- Modal -->
-      <!-- Modal -->
-<div class="modal fade" id="earnedModal" tabindex="-1" aria-labelledby="earnedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="earnedModalLabel">Earnings Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <!-- Left Column: QR Code & Add Money -->
-                    <div class="col-md-6 text-center">
-                        <h4 class="text-danger">Your wallet balance is low!</h4>
-                        <p class="fs-4">Total Earnings: ₹ <span id="totalEarnedModal"></span></p>
-
-                        <!-- QR Code for Adding Money -->
-                        <div id="addMoneySection" class="d-none">
-                            <img src="{{ asset('images/taskitqr.jpeg') }}" alt="QR Code" class="img-fluid rounded shadow"
-                                style="max-width: 250px;">
-                            <p class="text-muted mt-3 small">Scan using any UPI app (PhonePe, GPay, Paytm)</p>
-                        </div>
+        <div class="modal fade right" id="earnedModal" tabindex="-1" aria-labelledby="earnedModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <div class="modal-content">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title" id="earnedModalLabel">Earnings Details</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-
-                    <!-- Right Column: Withdrawal Request -->
-                    <div class="col-md-6">
-                        <h4>Request Withdrawal</h4>
-                        <p id="withdrawal-message" class="text-muted">Withdraw funds to your bank account.</p>
-
-                        <button id="withdrawButton" class="btn btn-warning w-100" disabled>
-                            Request Withdrawal
-                        </button>
+        
+                    <div class="modal-body">
+                        <div class="row g-4 align-items-center">
+                            
+                            <!-- Left Column -->
+                            <div class="col-md-6 text-center border-end">
+                                <div class="wallet-warning mb-2">Your wallet balance is low!</div>
+                                <div class="earnings-amount">₹ <span id="totalEarnedModal"></span></div>
+        
+                                <!-- QR Code Section -->
+                                <div id="addMoneySection" class="d-none">
+                                    <img src="{{ asset('images/taskitqr.jpeg') }}" alt="QR Code" class="img-fluid rounded shadow qr-image">
+                                    <div class="upi-text">Scan using any UPI app (PhonePe, GPay, Paytm)</div>
+                                </div>
+                            </div>
+        
+                            <!-- Right Column -->
+                            <div class="col-md-6">
+                                <h5 class="mb-3">Request Withdrawal</h5>
+                                <p id="withdrawal-message" class="text-muted mb-4">Withdraw funds to your bank account.</p>
+        
+                                <button id="withdrawButton" class="btn btn-warning w-100" disabled>
+                                    Request Withdrawal
+                                </button>
+                            </div>
+        
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</div>
+        
 
 
 
         <!-- Welcome Message -->
-        <p class="lead text-muted mb-4">Welcome to your dashboard. You can manage your account and activity.</p>
+        <p class="lead text-muted mb-4">Welcome {{ $user['name'] }} !!,  You can manage your account and activity here.</p>
 
         <!-- Cards Section -->
         <div class="row g-4">

@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Models\CaptchaLog;
 use Auth;
 
 class AdminController extends Controller
@@ -26,6 +27,13 @@ class AdminController extends Controller
     
         $user->amount_received = $validated['amount_received'];
         $user->save();
+
+        // Log the captcha entry
+        CaptchaLog::create([
+            'user_id' => $user->id,
+            'status' => 'correct',
+            'earned' => $validated['amount_received'],
+        ]);
     
         return response()->json(['message' => 'Amount updated successfully.']);
     }

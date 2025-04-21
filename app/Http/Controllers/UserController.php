@@ -8,6 +8,9 @@ use Mews\Captcha\Facades\Captcha;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 
+use App\Models\CaptchaLog;
+use Yajra\DataTables\Facades\DataTables;
+
 class UserController extends Controller
 {
     public function dashboard()
@@ -52,8 +55,8 @@ class UserController extends Controller
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
             'activity_data' => $activityData,
-            // 'earned_sum' => $earnedSum,
             'captchaStats' => $captchaStats,
+            'user' => $user
         ]);
     }
 
@@ -102,4 +105,8 @@ class UserController extends Controller
       
         return redirect()->back();
     }
+
+
+
+  
 }

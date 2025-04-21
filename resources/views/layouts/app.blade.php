@@ -16,10 +16,14 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+
+
+
+    
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <nav class="navbar navbar-expand-md navbar-dark bg-dark shadow-sm">
             <div class="container">
                 <!-- App Name -->
                 <a class="navbar-brand" href="{{ url('/') }}">
@@ -52,6 +56,7 @@
                         @endif
         
                         {{-- Other always-visible buttons --}}
+                        <a href="{{ url('user/report') }}" class="btn btn-outline-primary">Report</a>
                         <a href="#" class="btn btn-outline-primary">Payout</a>
                         <a href="#" class="btn btn-outline-secondary">Softwares</a>
                     </div>
@@ -60,17 +65,17 @@
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
                         @guest
-                            @if (Route::has('login'))
+                            {{-- @if (Route::has('login'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
-                            @endif
+                            @endif --}}
         
-                            @if (Route::has('register'))
+                            {{-- @if (Route::has('register'))
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </li>
-                            @endif
+                            @endif --}}
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"

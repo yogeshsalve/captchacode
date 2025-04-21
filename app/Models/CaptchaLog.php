@@ -17,4 +17,9 @@ class CaptchaLog extends Model
         'work_started',
         'earned'
     ];
+
+    public function user()
+{
+    return $this->belongsTo(User::class);
+}
 }
