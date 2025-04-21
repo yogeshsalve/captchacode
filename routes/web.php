@@ -24,11 +24,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
-  // Show the edit amount form
-Route::get('/user/{id}/edit-amount', [App\Http\Controllers\AdminController::class, 'editAmount'])->name('user.editAmount');
+    Route::post('/update-amount/{user}', [App\Http\Controllers\AdminController::class, 'updateAmount']);
 
-// Update the amount in the user table
-Route::post('/admin/users/{id}/update-amount', [App\Http\Controllers\AdminController::class, 'updateAmount'])->name('user.updateAmount');;
 
 
     Route::get('/user/dashboard', [App\Http\Controllers\UserController::class, 'dashboard'])->name('user.dashboard');

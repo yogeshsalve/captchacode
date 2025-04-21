@@ -18,21 +18,16 @@ class AdminController extends Controller
         return view('admin.dashboard', compact('users'));
     }
 
-       // Get the user's current amount_paid
-       public function editAmount($id)
-       {
-           $user = User::findOrFail($id);
-           return response()->json(['amount_paid' => $user->amount_paid]);
-       }
-   
-      // In UserController.php
-public function updateAmount(Request $request, $id)
-{
-    $user = User::findOrFail($id);
-    $user->amount_paid = $request->amount_paid;
-    $user->save();
-
-    return response()->json(['message' => 'Amount updated successfully.']);
-}
+    public function updateAmount(Request $request, User $user)
+    {
+        $validated = $request->validate([
+            'amount_received' => 'required|numeric|min:0'
+        ]);
+    
+        $user->amount_received = $validated['amount_received'];
+        $user->save();
+    
+        return response()->json(['message' => 'Amount updated successfully.']);
+    }
 }
 

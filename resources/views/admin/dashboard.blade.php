@@ -28,67 +28,96 @@
                         <td>{{ $user->mobile }}</td>
                         <td>{{ $user->email }}</td>
                         <td> {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}</td>
-                        <td>{{ $user->amount_received }}
+                        <td class="d-flex justify-content-between align-items-center">
+                            <span>{{ $user->amount_received }}</span>
+                            
                             <!-- Edit Amount Button with Pencil Icon -->
-                            <!-- Edit Button -->
-                            <a href="javascript:void(0)" class="btn btn-outline-info"
-                                onclick="openEditAmountModal({{ $user->id }}, {{ $user->amount_paid ?? 0 }})">
-                                <i class="fas fa-pencil-alt"></i> Edit Amount
-                            </a>
+                            @if ($user->amount_received <= 0)
+                                <a href="javascript:void(0)" 
+                                   class="btn btn-outline-info" 
+                                   id="editBtn-{{ $user->id }}"
+                                   onclick="openEditAmountModal({{ $user->id }})">
+                                   <i class="fas fa-pencil-alt"></i>
+                                </a>
+                            @endif
                         </td>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-  <!-- Modal for editing amount -->
-<div class="modal fade" id="editAmountModal" tabindex="-1" aria-labelledby="editAmountModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editAmountModalLabel">Edit Amount Paid</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <!-- Edit Amount Form -->
-                <form id="editAmountForm" method="POST">
-                    @csrf
-                    <div class="mb-3">
-                        <label for="amount_paid" class="form-label">Amount Paid (₹)</label>
-                        <input type="number" class="form-control" id="amount_paid" name="amount_paid" required>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update Amount</button>
-                </form>
-                <div id="successMessage" class="mt-2 text-success" style="display:none;">
-                    <strong>Amount received successfully!</strong>
+
+
+    <!-- Modal -->
+    <!-- Modal -->
+    <div class="modal fade" id="editAmountModal" tabindex="-1" aria-labelledby="editAmountModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editAmountModalLabel">Enter Amount to Update</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAmountForm">
+                        <input type="text" id="userIdInput" name="user_id">
+                        <div class="mb-3">
+                            <label for="amountInput" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="amountInput" name="amount" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Script -->
-<script>
-    function openEditAmountModal(userId, currentAmount) {
-        $('#amount_paid').val(currentAmount);
-        $('#editAmountForm').attr('action', `/admin/users/${userId}/update-amount`);
-        $('#editAmountModal').modal('show');
-    }
+    <!-- Bootstrap JS (required for modal) -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> --}}
 
-    $('#editAmountForm').submit(function (e) {
-        e.preventDefault();
+    <script>
+        function openEditAmountModal(userId) {
+            document.getElementById('userIdInput').value = userId;
+            const modal = new bootstrap.Modal(document.getElementById('editAmountModal'));
+            modal.show();
+        }
 
-        const form = $(this);
-        const url = form.attr('action');
-        const data = form.serialize();
+        document.getElementById('editAmountForm').addEventListener('submit', function(e) {
+            e.preventDefault();
 
-        $.post(url, data, function (response) {
-            $('#editAmountModal').modal('hide');
-            $('#successMessage').show().delay(2000).fadeOut();
-            location.reload(); // Optional: you can remove this if you dynamically update the UI
-        }).fail(function (xhr) {
-            alert("Error updating amount.");
+            const userId = document.getElementById('userIdInput').value;
+            const amount = document.getElementById('amountInput').value;
+
+            fetch(`/update-amount/${userId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
+                            'content')
+                    },
+                    body: JSON.stringify({
+                        amount_received: amount
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+
+
+
+                    // HIDE BUTTON
+                    const editBtn = document.getElementById('editBtn-' + userId);
+                    if (editBtn) {
+                        editBtn.style.display = 'none'; // hide the button
+                    }
+
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editAmountModal'));
+                    modal.hide();
+                    location.reload(); // reload to reflect updated data if needed
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("Something went wrong!");
+                });
         });
-    });
-</script>
+    </script>
 @endsection
