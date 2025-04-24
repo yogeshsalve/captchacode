@@ -1,16 +1,17 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h1>🛠️ Admin Dashboard</h1>
-        <p>Welcome, Admin! You can manage users and system settings.</p>
-    </div>
+<div class="container mt-5">
+    <h1 class="mb-3 text-center">🛠️ Admin Dashboard</h1>
+    <p class="text-center text-muted">Welcome, Admin! You can manage users and system settings.</p>
+</div>
 
-    <div class="container">
-        <h2>Registered Users</h2>
+<div class="container mt-5">
+    <h2 class="mb-4 text-primary">📋 Registered Users</h2>
 
-        <table class="table table-bordered mt-4">
-            <thead>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover table-bordered shadow-sm rounded">
+            <thead class="table-dark">
                 <tr>
                     <th>#</th>
                     <th>Name</th>
@@ -23,101 +24,83 @@
             <tbody>
                 @foreach ($users as $index => $user)
                     <tr>
-                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $users->firstItem() + $index }}</td>
                         <td>{{ $user->name }}</td>
                         <td>{{ $user->mobile }}</td>
                         <td>{{ $user->email }}</td>
-                        <td> {{ \Carbon\Carbon::parse(Auth::user()->created_at)->format('d F Y') }}</td>
-                        <td class="d-flex justify-content-between align-items-center">
-                            <span>{{ $user->amount_received }}</span>
-                            
-                            <!-- Edit Amount Button with Pencil Icon -->
-                            @if ($user->amount_received <= 0)
-                                <a href="javascript:void(0)" 
-                                   class="btn btn-outline-info" 
-                                   id="editBtn-{{ $user->id }}"
-                                   onclick="openEditAmountModal({{ $user->id }})">
-                                   <i class="fas fa-pencil-alt"></i>
-                                </a>
-                            @endif
+                        <td>{{ \Carbon\Carbon::parse($user->created_at)->format('d F Y') }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                @if ($user->amount_received <= 0)
+                                    <input type="text"
+                                           class="form-control form-control-sm editable-amount"
+                                           data-user-id="{{ $user->id }}"
+                                           value="{{ $user->amount_received }}"
+                                           onkeydown="if(event.key === 'Enter') updateAmount(event, this)">
+                                @else
+                                    <span class="badge bg-success px-3 py-2">{{ $user->amount_received }}</span>
+                                @endif
+                            </div>
                         </td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
 
-
-
-    <!-- Modal -->
-    <!-- Modal -->
-    <div class="modal fade" id="editAmountModal" tabindex="-1" aria-labelledby="editAmountModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editAmountModalLabel">Enter Amount to Update</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editAmountForm">
-                        <input type="hidden" id="userIdInput" name="user_id">
-                        <div class="mb-3">
-                            <label for="amountInput" class="form-label">Amount</label>
-                            <input type="number" class="form-control" id="amountInput" name="amount" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+    <!-- Pagination Links -->
+    <div class="d-flex justify-content-center mt-4">
+        {{ $users->links() }}
     </div>
+</div>
 
-    <!-- Bootstrap JS (required for modal) -->
-    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script> --}}
+
 
     <script>
-        function openEditAmountModal(userId) {
-            document.getElementById('userIdInput').value = userId;
-            const modal = new bootstrap.Modal(document.getElementById('editAmountModal'));
-            modal.show();
+  function updateAmount(event, inputElement) {
+    const userId = inputElement.getAttribute('data-user-id');  // Get user ID from the data attribute
+    const newAmount = inputElement.value;
+
+    fetch(`/update-amount/${userId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        },
+        body: JSON.stringify({ amount_received: newAmount })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            // Success: Show success message
+            alert(data.message);
+
+            // Update the input field value with the new amount
+            inputElement.value = newAmount;
+
+            // Optionally, you can replace the input box with the updated value
+            inputElement.style.display = 'none';  // Hide the text box
+
+            // Create a span to display the updated value
+            const span = document.createElement('span');
+            span.textContent = `${newAmount}`;
+            span.classList.add('updated-amount');  // You can style this span as needed
+
+            // Append the span next to the input element
+            inputElement.parentNode.appendChild(span);
+
+        } else {
+            // If the response doesn't contain a message, log it
+            alert('Failed to update the amount: Unexpected response.');
         }
-
-        document.getElementById('editAmountForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const userId = document.getElementById('userIdInput').value;
-            const amount = document.getElementById('amountInput').value;
-
-            fetch(`/update-amount/${userId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute(
-                            'content')
-                    },
-                    body: JSON.stringify({
-                        amount_received: amount
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    alert(data.message);
+    })
+    .catch(error => {
+        // If there was an error with the request, log it
+        console.error('Error:', error);
+        alert("Something went wrong! Please try again.");
+    });
+}
 
 
-
-                    // HIDE BUTTON
-                    const editBtn = document.getElementById('editBtn-' + userId);
-                    if (editBtn) {
-                        editBtn.style.display = 'none'; // hide the button
-                    }
-
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('editAmountModal'));
-                    modal.hide();
-                    location.reload(); // reload to reflect updated data if needed
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert("Something went wrong!");
-                });
-        });
-    </script>
+</script>    
 @endsection
