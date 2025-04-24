@@ -1,65 +1,64 @@
 @extends('layouts.app')
 
 @section('content')
+    <style>
+        .modal.right .modal-dialog {
+            position: fixed;
+            margin: auto;
+            width: 50%;
+            height: 100%;
+            right: 0;
+            top: 0;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+        }
 
-<style>
-    .modal.right .modal-dialog {
-        position: fixed;
-        margin: auto;
-        width: 50%;
-        height: 100%;
-        right: 0;
-        top: 0;
-        transform: translateX(100%);
-        transition: transform 0.3s ease-out;
-    }
+        .modal.right.show .modal-dialog {
+            transform: translateX(0);
+        }
 
-    .modal.right.show .modal-dialog {
-        transform: translateX(0);
-    }
+        .modal.right .modal-content {
+            height: 100%;
+            overflow-y: auto;
+            border-radius: 0;
+        }
 
-    .modal.right .modal-content {
-        height: 100%;
-        overflow-y: auto;
-        border-radius: 0;
-    }
+        .modal.right .modal-header {
+            border-bottom: 1px solid #dee2e6;
+        }
 
-    .modal.right .modal-header {
-        border-bottom: 1px solid #dee2e6;
-    }
+        .modal.right .modal-body {
+            padding: 2rem;
+        }
 
-    .modal.right .modal-body {
-        padding: 2rem;
-    }
+        .wallet-warning {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: #dc3545;
+        }
 
-    .wallet-warning {
-        font-size: 1.1rem;
-        font-weight: 500;
-        color: #dc3545;
-    }
+        .earnings-amount {
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
 
-    .earnings-amount {
-        font-size: 2rem;
-        font-weight: 600;
-        margin-bottom: 1.5rem;
-    }
+        .qr-image {
+            max-width: 200px;
+            margin: 1rem auto;
+        }
 
-    .qr-image {
-        max-width: 200px;
-        margin: 1rem auto;
-    }
-
-    .upi-text {
-        font-size: 0.875rem;
-        color: #6c757d;
-    }
-</style>
+        .upi-text {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
 
 
     <div class="container my-4">
         <!-- Header -->
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
-            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>          
+            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
             <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
                 onclick="syncEarnedToModal()" id="earnedButton">
                 <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned">0</span>
@@ -73,45 +72,47 @@
                 <div class="modal-content">
                     <div class="modal-header bg-primary text-white">
                         <h5 class="modal-title" id="earnedModalLabel">Earnings Details</h5>
-                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                            aria-label="Close"></button>
                     </div>
-        
+
                     <div class="modal-body">
                         <div class="row g-4 align-items-center">
-                            
+
                             <!-- Left Column -->
                             <div class="col-md-6 text-center border-end">
                                 <div class="wallet-warning mb-2">Your wallet balance is low!</div>
                                 <div class="earnings-amount">₹ <span id="totalEarnedModal"></span></div>
-        
+
                                 <!-- QR Code Section -->
                                 <div id="addMoneySection" class="d-none">
-                                    <img src="{{ asset('images/taskitqr.jpeg') }}" alt="QR Code" class="img-fluid rounded shadow qr-image">
+                                    <img src="{{ asset('images/taskitqr.jpeg') }}" alt="QR Code"
+                                        class="img-fluid rounded shadow qr-image">
                                     <div class="upi-text">Scan using any UPI app (PhonePe, GPay, Paytm)</div>
                                 </div>
                             </div>
-        
+
                             <!-- Right Column -->
                             <div class="col-md-6">
                                 <h5 class="mb-3">Request Withdrawal</h5>
                                 <p id="withdrawal-message" class="text-muted mb-4">Withdraw funds to your bank account.</p>
-        
+
                                 <button id="withdrawButton" class="btn btn-warning w-100" disabled>
                                     Request Withdrawal
                                 </button>
                             </div>
-        
+
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
+
 
 
 
         <!-- Welcome Message -->
-        <p class="lead text-muted mb-4">Welcome {{ $user['name'] }} !!,  You can manage your account and activity here.</p>
+        <p class="lead text-muted mb-4">Welcome {{ $user['name'] }} !!, You can manage your account and activity here.</p>
 
         <!-- Cards Section -->
         <div class="row g-4">
@@ -166,14 +167,30 @@
                         <!-- Captcha Form -->
                         <div id="captchaForm" class="{{ $workStarted ? '' : 'd-none' }} mt-4 text-center">
 
+                            <!-- Top-left Button Row -->
+                            <div class="position-absolute top-0 start-0 mt-2 ms-3 d-flex">
+
+                                <button type="button" class="btn btn-sm btn-warning me-1" onclick="tryCaptcha()"
+                                    title="Try Captcha">
+                                    <i class="fas fa-vial">&nbsp; Try Free 10 Captcha</i> <!-- vial icon for 'test/try' -->
+                                </button>
+                                {{-- <form id="stopWorkFormLeft" action="{{ route('stop.work') }}" method="POST">
+                                    @csrf
+                                    <button class="btn btn-sm btn-danger" title="Stop">
+                                        <i class="fas fa-stop"></i>
+                                    </button>
+                                </form> --}}
+                            </div>
+
                             <!-- Top-right Button Row -->
                             <div class="position-absolute top-0 end-0 mt-2 me-3 d-flex">
                                 <button type="button" class="btn btn-sm btn-outline-secondary me-1"
                                     onclick="reloadCaptcha()" title="Reload Captcha">
                                     <i class="fas fa-sync-alt"></i>
                                 </button>
-                                <button class="btn btn-sm btn-warning me-1" title="Pause">
-                                    <i class="fas fa-pause"></i>
+                                <button type="button" class="btn btn-sm btn-outline-secondary me-1"
+                                    onclick="downloadData()" title="Download">
+                                    <i class="fas fa-download"></i>
                                 </button>
                                 <form id="stopWorkForm" action="{{ route('stop.work') }}" method="POST">
                                     @csrf
@@ -192,7 +209,7 @@
 
                             <!-- Red warning message -->
                             <p id="wallet-warning" class="text-danger mt-2" style="display: none;">
-                               <strong>To Start Earning, Add Money in Your Wallet.</strong>
+                                <strong>To Start Earning, Add Money in Your Wallet.</strong>
                             </p>
                         </div>
 
@@ -362,8 +379,6 @@
 
 
     <script>
-
-
         function earnedSum() {
             $.ajax({
                 url: "{{ route('user.earnedSum') }}",
