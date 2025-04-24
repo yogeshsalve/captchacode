@@ -23,6 +23,7 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('/superadmin/dashboard', [App\Http\Controllers\SuperAdminController::class, 'supdashboard'])->name('superadmin.dashboard');
     Route::get('/admin/dashboard', [App\Http\Controllers\AdminController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/update-amount/{user}', [App\Http\Controllers\AdminController::class, 'updateAmount']);
 
@@ -37,7 +38,7 @@ Route::middleware(['auth'])->group(function () {
    
 });
 
-Route::get('/superadmin/dashboard', fn() => view('superadmin.dashboard'))->name('superadmin.dashboard');
+// Route::get('/superadmin/dashboard', fn() => view('superadmin.dashboard'))->name('superadmin.dashboard');
 //Route::get('/admin/dashboard', fn() => view('admin.dashboard'))->name('admin.dashboard');
 //Route::get('/user/dashboard', fn() => view('user.dashboard'))->name('user.dashboard');
 

@@ -22,7 +22,8 @@ class User extends Authenticatable
         'mobile',
         'email',
         'password',
-        'work_started'
+        'work_started',
+        'plain'
        
     ];
 

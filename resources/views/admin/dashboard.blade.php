@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container mt-5">
+<div class="container mt-2">
     <h1 class="mb-3 text-center">🛠️ Admin Dashboard</h1>
     <p class="text-center text-muted">Welcome, Admin! You can manage users and system settings.</p>
 </div>
 
-<div class="container mt-5">
+<div class="container mt-2">
     <h2 class="mb-4 text-primary">📋 Registered Users</h2>
 
     <div class="table-responsive">
