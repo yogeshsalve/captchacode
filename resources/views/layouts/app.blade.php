@@ -114,10 +114,17 @@
     {{-- Footer placed outside the main div --}}
     <footer class="bg-dark text-white py-3 mt-auto">
         <div class="container d-flex justify-content-between align-items-center flex-column flex-md-row text-center text-md-start">
-            <a href="{{ route('terms') }}" class="text-decoration-none text-warning">Terms and Conditions</a>
-            <p class="mb-0">&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+            <!-- Left side: Terms and Conditions & Privacy Policy links -->
+            <div class="d-flex flex-column flex-md-row">
+                <a href="{{ route('terms') }}" class="text-decoration-none text-warning me-md-3 mb-2 mb-md-0">Terms and Conditions</a>
+                <a href="{{ route('privacy') }}" class="text-decoration-none text-warning">Privacy Policy</a>
+            </div>
+    
+            <!-- Right side: Copyright Notice -->
+            <p class="mb-0 mt-3 mt-md-0">&copy; 2022 {{ config('app.name') }}. All rights reserved.</p>
         </div>
     </footer>
+    
 </div>
 </body>
 
