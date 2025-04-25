@@ -66,6 +66,9 @@ Route::get('/reload-captcha', function () {
     return response()->json(['captcha' => captcha_src($captchaType) . '?' . rand()]);
 });
 
-
+// Terms and Conditions route
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
 
 
