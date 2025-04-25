@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
 
 use App\Models\CaptchaLog;
+use App\Models\Trycaptcha;
 use Yajra\DataTables\Facades\DataTables;
 
 class UserController extends Controller
@@ -51,11 +52,22 @@ class UserController extends Controller
             ')
             ->where('user_id', auth()->id())
             ->first();
+
+
+            $trycaptchaStats = DB::table('trycaptcha')
+            ->selectRaw('
+                COUNT(*) as total_captchas,
+                SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+                SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count
+            ')
+            ->where('user_id', auth()->id())
+            ->first();
         
         return view('user.dashboard', [
             'captcha_image' => $captcha_image,
             'activity_data' => $activityData,
             'captchaStats' => $captchaStats,
+            'trycaptchaStats' => $trycaptchaStats,
             'user' => $user
         ]);
     }
@@ -87,6 +99,24 @@ class UserController extends Controller
 
     return response()->json($stats);
 }
+
+
+public function trygetCaptchaStats()
+{
+    $userId = auth()->id();
+
+    $trystats = DB::table('trycaptcha')
+        ->selectRaw('
+            COUNT(*) as total_captchas,
+            SUM(CASE WHEN status = "correct" THEN 1 ELSE 0 END) as correct_count,
+            SUM(CASE WHEN status = "incorrect" THEN 1 ELSE 0 END) as incorrect_count
+        ')
+        ->where('user_id', $userId)
+        ->first();
+
+    return response()->json($trystats);
+}
+
 
     public function startWork()
     {

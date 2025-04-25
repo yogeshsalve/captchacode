@@ -54,15 +54,128 @@
         }
     </style>
 
+    <style>
+        /* Make modal take half the screen width from the left */
+        .left-half-modal .modal-dialog-left {
+            position: fixed;
+            top: 0;
+            left: 0;
+            margin: 0;
+            width: 50vw;
+            height: 100vh;
+            transform: translateX(-100%);
+            transition: transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .left-half-modal.show .modal-dialog-left {
+            transform: translateX(0);
+            pointer-events: auto;
+        }
+
+        /* Make sure modal backdrop covers full screen */
+        .left-half-modal .modal-backdrop {
+            opacity: 0.5 !important;
+        }
+    </style>
+
 
     <div class="container my-4">
         <!-- Header -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+        {{-- <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
             <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
+            <p>Try Here</p>
             <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
                 onclick="syncEarnedToModal()" id="earnedButton">
-                <i class="fas fa-wallet me-2"></i> ₹ <span id="totalEarned">0</span>
+                <i class="fas fa-wallet me-2"></i>₹ <span id="totalEarned">0</span>
             </a>
+        </div> --}}
+
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3">
+            <!-- Left side: Title -->
+            <h2 class="mb-2 mb-md-0">🙋 User Dashboard</h2>
+
+            <!-- Right side: Try text and Button -->
+            <div class="d-flex align-items-center gap-2">
+                <a href="#" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#captchaModal"
+                    onclick="syncEarnedToModal1()" id="tryButton">
+                    🎁 Try For Free
+                </a>
+                <a href="#" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#earnedModal"
+                    onclick="syncEarnedToModal()" id="earnedButton">
+                    <i class="fas fa-wallet me-2"></i>₹ <span id="totalEarned">0</span>
+                </a>
+            </div>
+        </div>
+
+
+
+        {{-- free try captcha modal --}}
+        <div class="modal fade" id="captchaModal" tabindex="-1" aria-labelledby="captchaModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content shadow-lg rounded style="box-shadow: 0 0 40px rgba(0,0,0,0.4);"">
+                    <div class="modal-header bg-warning text-dark">
+                        <h5 class="modal-title" id="captchaModalLabel">🧩 Try this Captcha Challenge</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+
+                    <div class="modal-body d-flex flex-column flex-md-row gap-3">
+                        <!-- Left Side: User Info -->
+                        <div class="flex-fill border-end pe-md-3 mb-3 mb-md-0">
+                            <h5 class="mb-2">👤 User Info</h5>
+                            <p><strong>Name:</strong> {{ $user['name'] }}</p>
+                            <p><strong>Plan:</strong> Free Trial</p>
+                            <p><strong>Trial Captchas:</strong> 10 remaining</p>
+                            <p><strong>Amount Earned:</strong> Rs. 5.00</p>
+
+                            <div class="d-flex flex-wrap justify-content-center gap-2 mt-3">
+                                <a href="#" class="btn btn-success" style="width: 150px;">
+                                    <span id="trycorrectCount">0</span>
+                                </a>
+                                <a href="#" class="btn btn-danger" style="width: 150px;">
+                                    <span id="tryincorrectCount">0</span>
+                                </a>
+                            </div>
+                            
+
+                           
+                            <!-- Add more info as needed -->
+                        </div>
+
+                        <!-- Right Side: Captcha Form -->
+                        <div class="flex-fill text-center">
+
+                            <center>
+                                <div class="small">
+                                    <strong class="text-success">+ 50 Paisa</strong> for Right Captcha &nbsp; | &nbsp;
+                                    <strong class="text-danger">- 25 Paisa</strong> for Wrong Captcha
+                                </div>
+                            </center>
+
+                            <!-- Captcha Image and Reload -->
+                            <div class="mb-3">
+                                <img id="captchaImage1" src="{{ $captcha_image }}" alt="Captcha" class="my-3"
+                                    style="height: 60px;">
+
+                            </div>
+
+                            <!-- Input -->
+                            <input type="text" name="captcha" id="trycaptcha-input" class="form-control mx-auto"
+                                placeholder="Enter captcha" style="max-width: 300px;" required>
+                            <br>
+                            <!-- Submit -->
+                            <div class="d-flex justify-content-center gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="reloadCaptcha1()"
+                                    title="Reload Captcha">
+                                    <i class="fas fa-sync-alt"></i> Reload
+                                </button>
+                                <button class="btn btn-primary" id="trycaptcha-submit">Submit</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
 
@@ -169,11 +282,16 @@
 
                             <!-- Top-left Button Row -->
                             <div class="position-absolute top-0 start-0 mt-2 ms-3 d-flex">
-
-                                <button type="button" class="btn btn-sm btn-warning me-1" onclick="tryCaptcha()"
-                                    title="Try Captcha">
-                                    <i class="fas fa-vial">&nbsp; Try Free 10 Captcha</i> <!-- vial icon for 'test/try' -->
-                                </button>
+                                <marquee>
+                                    <div class="small">
+                                        <strong class="text-success">+ 50 Paisa</strong> for Right Captcha &nbsp; | &nbsp;
+                                        <strong class="text-danger">- 25 Paisa</strong> for Wrong Captcha
+                                    </div>
+                                </marquee>
+                                {{-- <button type="button" class="btn btn-sm btn-warning me-1" id="tryCaptchaBtn"
+                                onclick="tryCaptcha()" title="Try Captcha">
+                                <i class="fas fa-vial">&nbsp; Try Free 10 Captcha</i>
+                            </button> --}}
                                 {{-- <form id="stopWorkFormLeft" action="{{ route('stop.work') }}" method="POST">
                                     @csrf
                                     <button class="btn btn-sm btn-danger" title="Stop">
@@ -305,6 +423,9 @@
             };
 
 
+
+
+
         });
     </script>
 
@@ -427,21 +548,117 @@
 
 
 
-    {{-- <script>
-        function earnedSum() {
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+    // Set default values in case there's no data
+    if (!document.getElementById('trycorrectCount').innerText) {
+        document.getElementById('trycorrectCount').innerText = '0';
+    }
+
+    if (!document.getElementById('tryincorrectCount').innerText) {
+        document.getElementById('tryincorrectCount').innerText = '0';
+    }
+});
+    </script>
+
+
+
+
+
+
+{{-- trycaptcha script --}}
+<script>
+$(document).ready(function() {
+    $('#trycaptcha-submit').on('click', function(e) {
+        e.preventDefault();
+
+        var captcha = $('#trycaptcha-input').val();
+        var token = $('meta[name="csrf-token"]').attr('content');
+
+        $.ajax({
+            url: "{{ route('trycaptcha.verify') }}",
+            type: 'POST',
+            data: {
+                _token: token,
+                captcha: captcha
+            },
+            success: function(response) {
+
+                console.log("Response:", response);
+
+                $('#trycaptcha-input').val('');
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Congratulations 50 Paise Credited !!',
+                        text: response.message
+                    });
+
+                    reloadCaptcha1();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops,  25 Paise Deducted !!',
+                        text: response.message
+                    });
+
+                    reloadCaptcha1(); // Refresh captcha image if incorrect
+                }
+            },
+            error: function() {
+                $('#trycaptcha-input').val('');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'An unexpected error occurred.'
+                });
+
+                reloadCaptcha1(); // Just in case
+            }
+        });
+    });
+
+
+});
+window.reloadCaptcha1 = function() {
+            $.get(`{{ url('/reload-captcha') }}?t=${Date.now()}`, function(data) {
+                $('#captchaImage1').attr('src', data.captcha);
+            });
+            };
+
+
+// trycaptchastatus
+            function tryfetchCaptchaStats() {
             $.ajax({
-                url: "{{ route('user.earnedSum') }}",
+                url: "{{ route('user.trycaptcha.stats') }}",
                 type: "GET",
                 success: function(data) {
-                    console.log("Earned Sum Response:", data);
-                    $('#totalEarned').text(data.total_earned);
-
+                    $('#trytotalCaptchas').text(data.total_captchas || 0);
+                    $('#trycorrectCount').text(data.correct_count || 0);
+                    $('#tryincorrectCount').text(data.incorrect_count || 0);
                 }
             });
         }
 
         // Fetch every 5 seconds
-        setInterval(earnedSum, 5000);
-        earnedSum(); // Initial load
-    </script> --}}
+        setInterval(tryfetchCaptchaStats, 5000);
+        tryfetchCaptchaStats(); // Initial load
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 @endsection
